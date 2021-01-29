@@ -56,21 +56,6 @@
         _loading = false;
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await RefreshTable();
-    }
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
