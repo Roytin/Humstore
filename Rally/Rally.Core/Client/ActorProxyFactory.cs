@@ -10,32 +10,17 @@ namespace Rally.Core.Client
 {
     public class ActorProxyFactory : IActorFactory
     {
-        //private List<Assembly> assemblies = new List<Assembly>();
-        //private Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
+        private readonly PostMan _postMan;
 
-        //public void AddAssembly(Assembly assembly)
-        //{
-        //    //scan assemblies, find out all cells
-        //    assemblies.Add(assembly);
-        //    foreach(var type in assembly.GetTypes())
-        //    {
-        //        if(type.IsActor())
-        //        {
-        //            var interfaces = type.GetInterfaces();
-        //            var cellInterfaces = interfaces.Where(x => x != typeof(IActor)).Where(x=> x.GetInterface(nameof(IActor)) != null).ToArray();
-        //            foreach (var cellInterface in cellInterfaces) 
-        //            {
-        //                _interfaceToClass.Add(cellInterface, type);
-        //            }
-        //            var methods = type.GetMethods();
-        //        }
-        //    }
-        //}
+        public ActorProxyFactory(PostMan postMan)
+        {
+            this._postMan = postMan;
+        }
 
-        public TActorInterface GetCell<TActorInterface>(string actorId) where TActorInterface : class, IActor
+        public TActorInterface GetActor<TActorInterface>(string actorId) where TActorInterface : class, IActor
         {
             ProxyGenerator proxyGenerator = new ProxyGenerator();
-            var proxyClass = proxyGenerator.CreateInterfaceProxyWithoutTarget<TActorInterface>(new ActorProxy(actorId));
+            var proxyClass = proxyGenerator.CreateInterfaceProxyWithoutTarget<TActorInterface>(new ActorProxy(actorId, _postMan));
             return proxyClass;
         }
     }

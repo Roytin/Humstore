@@ -5,44 +5,48 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using Castle.DynamicProxy;
+using System.Collections.Concurrent;
 
 namespace Rally.Core.Server
 {
-    public class ActorFactory : IActorFactory
+    public class ActorFactory
     {
-        private List<Assembly> assemblies = new List<Assembly>();
-        private Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
+        private Dictionary<string, ActorInfo> _interfaceToActorInfo = new Dictionary<string, ActorInfo>();
 
-        public void AddAssembly(Assembly assembly)
+        private ConcurrentDictionary<string, Actor> _actors = new ConcurrentDictionary<string, Actor>();
+
+        internal void RegisterActor(string interfaceName, ActorInfo actorInfo)
         {
-            //scan assemblies, find out all cells
-            assemblies.Add(assembly);
-            foreach(var type in assembly.GetTypes())
-            {
-                if(type.IsActor())
-                {
-                    var interfaces = type.GetInterfaces();
-                    var cellInterfaces = interfaces.Where(x => x != typeof(IActor)).Where(x=> x.GetInterface(nameof(IActor)) != null).ToArray();
-                    foreach (var cellInterface in cellInterfaces) 
-                    {
-                        _interfaceToClass.Add(cellInterface, type);
-                    }
-                    var methods = type.GetMethods();
-                }
-            }
+            _interfaceToActorInfo.Add(interfaceName, actorInfo);
         }
 
-        public TActorInterface GetCell<TActorInterface>(string actorId) where TActorInterface : class, IActor
+        public TActorInterface GetActor<TActorInterface>(string actorId) where TActorInterface : class, IActor
         {
-            if(_interfaceToClass.TryGetValue(typeof(TActorInterface), out var impl))
+            var actor = this.GetActor(typeof(TActorInterface).FullName, actorId);
+            return actor as TActorInterface;
+        }
+
+        internal Actor GetActor(string interfaceName, string actorId) 
+        {
+            if (_interfaceToActorInfo.TryGetValue(interfaceName, out var actorInfo))
             {
-                var obj = (TActorInterface)Activator.CreateInstance(impl);
-                if (obj is Actor actor)
-                {
+                //todo: 路由
+                string actorKey = $"{interfaceName}:{actorId}";
+                return _actors.GetOrAdd(actorKey, (key)=> {
+
+                    var actor = Activator.CreateInstance(actorInfo.ActorType) as Actor;
                     actor.Active(actorId);
-                }
+                    return actor;
+                });
             }
-            return default;
+            throw new NotImplementedException($"there is no actor implemented by {interfaceName}");
         }
+    }
+
+
+    public struct ActorInfo
+    {
+        public Type ActorType;
+        public Type InterfaceType;
     }
 }

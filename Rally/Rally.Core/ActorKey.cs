@@ -23,5 +23,15 @@ namespace Rally.Core
         {
             return base.GetHashCode();
         }
+
+
+        public static string ParseToKey(Type type, string id)
+        {
+            if(!type.IsInterface)
+            {
+                throw new Exception($"can't find interface {type.FullName}");
+            }
+            return $"{type.Name}_{id}";
+        }
     }
 }

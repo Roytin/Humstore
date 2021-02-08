@@ -1,5 +1,10 @@
-﻿using Rally.Core;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Rally.Core;
+using Rally.Core.Client;
+using Rally.Core.Server;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rally.TestingHost
@@ -9,17 +14,51 @@ namespace Rally.TestingHost
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var actorFactory = new ActorFactory();
-            actorFactory.AddAssembly(typeof(ChatActor).Assembly);
-            var actor = actorFactory.GetCell<IChatActor>("a");
+            var host = new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services
+                        .Configure<HostOptions>(option =>
+                        {
+                            option.ShutdownTimeout = System.TimeSpan.FromSeconds(20);
+                        })
+                        .AddRally(rallyBuilder =>
+                        { 
+                            rallyBuilder.AddAssembly(typeof(ChatActor).Assembly);
+                        })
+                        .AddHostedService<ChatService>();
+                })
+                .Build();
+
+            await host.RunAsync();
+        }
+    }
+
+    public class ChatService : IHostedService
+    {
+        private readonly IActorFactory _actorFactory;
+
+        public ChatService(IActorFactory actorFactory)
+        {
+            this._actorFactory = actorFactory;
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            var actor = _actorFactory.GetActor<IChatActor>("a");
 
             for (int i = 0; i < 10; i++)
             {
                 var msg = await actor.Hello("世界");
-                Console.WriteLine(msg);
+                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} 收到反馈：{msg}");
             }
+        }
 
-            Console.ReadLine();
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} byebye1");
+            await Task.Delay(10 * 1000, cancellationToken);
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} byebye2");
         }
     }
 
@@ -27,6 +66,7 @@ namespace Rally.TestingHost
     {
         public async Task<string> Hello(string msg)
         {
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} 收到消息：{msg}");
             await Task.Delay(1000);
             return $"Hello, {msg}!";
         }

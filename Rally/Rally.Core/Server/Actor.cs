@@ -15,12 +15,9 @@ namespace Rally.Core.Server
         private BlockingCollection<Mail> _mailbox = new BlockingCollection<Mail>(new ConcurrentQueue<Mail>());
 
 
-        public async Task<object> ReceiveMail(Mail mail)
+        public void ReceiveMail(Mail mail)
         {
-            mail.Receipt = new TaskCompletionSource<object>();
             _mailbox.Add(mail);
-            var result = await mail.Receipt.Task;
-            return result;
         }
 
         internal void Active(string id)
@@ -28,23 +25,42 @@ namespace Rally.Core.Server
             Id = id;
             //todo: 读档
 
-            Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(async () =>
             {
                 while (true)
                 {
                     var mail = _mailbox.Take();
-                    var methodInfo = this.GetType().GetMethod(mail.MethodName, BindingFlags.Public|BindingFlags.Instance);
-                    //find method
-                    if(methodInfo != null)
+                    try
                     {
-                        //execute method
-                        var result = methodInfo.Invoke(this, mail.Parameters);
-                        //return result
-                        mail.Receipt.SetResult(result);
+                        var methodInfo = this.GetType().GetMethod(mail.MethodName, BindingFlags.Public | BindingFlags.Instance);
+                        //find method
+                        if (methodInfo != null)
+                        {
+                            //execute method
+                            var task = methodInfo.Invoke(this, mail.Parameters) as Task;
+                            await task;
+                            if (mail.Receipt != null)
+                            {
+                                var resultProperty = methodInfo.ReturnType.GetProperty("Result");
+                                if (resultProperty == null)
+                                {
+                                    //mail.Receipt.SetResult(task);
+                                }
+                                else
+                                {
+                                    var result = (string)resultProperty.GetValue(task, null);
+                                    mail.Receipt.SetResult(result);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            mail.Receipt?.SetException(new Exception($"actor [{this.GetType().FullName}] method [{mail.MethodName}] can't found!"));
+                        }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        mail.Receipt.SetException(new Exception($"actor [{this.GetType().FullName}] method [{mail.MethodName}] can't found!"));
+                        mail.Receipt?.SetException(ex);
                     }
                 }
             }, 

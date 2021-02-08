@@ -18,6 +18,6 @@ namespace Rally.Core
 
         public string MethodName { get; set; }
 
-        public TaskCompletionSource<object> Receipt { get; set; }
+        public TaskCompletionSource<string> Receipt { get; set; }
     }
 }

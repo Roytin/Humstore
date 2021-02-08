@@ -1,17 +1,22 @@
 ﻿using Castle.DynamicProxy;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rally.Core.Client
 {
     public class ActorProxy : IInterceptor
     {
         private readonly string _actorId;
+        private readonly PostMan _postMan;
 
-        public ActorProxy(string actorId)
+        public ActorProxy(string actorId, PostMan postMan)
         {
             this._actorId = actorId;
+            this._postMan = postMan;
         }
 
 
@@ -20,18 +25,28 @@ namespace Rally.Core.Client
             //Do before...
             try
             {
-                var actor = Activator.CreateInstance(invocation.TargetType);
-                invocation.Method.Name
-                ////invocation.Proceed();
-                //Console.WriteLine("你你你你要跳舞吗？");
-                //invocation.ReturnValue = Task.FromResult("哦哦哦");
-
+                var mail = new Mail
+                {
+                    ActorId = _actorId,
+                    InterfaceName = invocation.Method.DeclaringType.FullName,
+                    MethodName = invocation.Method.Name,
+                    Parameters = invocation.Arguments,
+                };
+                if (invocation.Method.ReturnType == typeof(void))
+                {
+                    _postMan.PostMail(mail);
+                }
+                else
+                {
+                    var returnType = invocation.Method.ReturnType.GetProperty("Result").GetType();
+                    var returnValue = _postMan.PostMailAsync(returnType, mail);
+                    invocation.ReturnValue = returnValue;
+                }
             }
             catch
             {
                 //...                
             }
-            //Do after...
         }
     }
 }
