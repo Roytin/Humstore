@@ -48,7 +48,7 @@ namespace Rally.Core.Server
                                 }
                                 else
                                 {
-                                    var result = (string)resultProperty.GetValue(task, null);
+                                    var result = resultProperty.GetValue(task, null);
                                     mail.Receipt.SetResult(result);
                                 }
                             }
