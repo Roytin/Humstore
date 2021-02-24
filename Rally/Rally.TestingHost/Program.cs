@@ -4,6 +4,7 @@ using Rally.Core;
 using Rally.Core.Client;
 using Rally.Core.Server;
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace Rally.TestingHost
                             option.ShutdownTimeout = System.TimeSpan.FromSeconds(20);
                         })
                         .AddRally(rallyBuilder =>
-                        { 
+                        {
                             rallyBuilder.AddAssembly(typeof(ChatActor).Assembly);
                         })
                         .AddHostedService<ChatService>();
@@ -49,7 +50,7 @@ namespace Rally.TestingHost
 
             for (int i = 0; i < 10; i++)
             {
-                var msg = await actor.Hello("世界");
+                var msg = await actor.Hello("陈");
                 Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} 收到反馈：{msg}");
             }
         }
@@ -68,6 +69,7 @@ namespace Rally.TestingHost
         {
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} 收到消息：{msg}");
             await Task.Delay(1000);
+            throw new Exception("我出错啦！");
             return $"Hello, {msg}!";
         }
     }

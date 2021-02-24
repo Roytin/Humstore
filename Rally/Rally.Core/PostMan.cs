@@ -26,16 +26,16 @@ namespace Rally.Core
         {
             mail.Receipt = new TaskCompletionSource<object>();
             OnReceivedMail(mail);
-            var taskReturnType = typeof(TaskCompletionSource<>).MakeGenericType(returnType);
-            var taskReturnValue = Activator.CreateInstance(taskReturnType);
+            //var taskReturnType = typeof(TaskCompletionSource<>).MakeGenericType(returnType);
+            //var taskReturnValue = Activator.CreateInstance(taskReturnType);
 
-           var method = typeof(TaskCompletionSourceEx).GetMethod("GetTaskResult", 1,
-                            new Type[] {
-                                typeof(Task<object>)
-                            });
-            var actor = method.MakeGenericMethod(handler.EventType).GetReflector();
-            actor.Invoke(null, endpoint, handler, _logger, _mongoCollection);
-            return mail.Receipt.Task;
+            var method = typeof(TaskCompletionSourceEx).GetMethod("GenericTaskResult", 1,
+                             new Type[] {
+                                 typeof(Task<object>)
+                             });
+            var actor = method.MakeGenericMethod(returnType);
+            var task = actor.Invoke(null, new object[] { mail.Receipt.Task });
+            return task;
         }
 
         internal void OnReceivedMail(Mail mail)
@@ -47,22 +47,27 @@ namespace Rally.Core
 
     public class TaskCompletionSourceEx
     {
-        public static async Task<TResult> GetTaskResult<TResult>(Task<object> originalTask)
+        public static Task<TResult> GenericTaskResult<TResult>(Task<object> originalTask)
         {
-            await originalTask;
-            var resultProperty = typeof(TResult).GetProperty("Result");
-            if (resultProperty == null)
-            {
-                //
-                return default;
-            }
-            else
-            {
-                var result = resultProperty.GetValue(originalTask, null);
-                if (result == default)
-                    return default;
-                return (TResult)result;
-            }
+            //var task = new TaskCompletionSource<TResult>();
+            //await originalTask.ContinueWith(act => task.SetResult((TResult)act.Result));
+            //return await task.Task;
+
+            return originalTask.ContinueWith<TResult>(act => (TResult)act.Result);
+
+            //await originalTask;
+            //var resultProperty = originalTask.GetType().GetProperty("Result");
+            //if (resultProperty == null)
+            //{
+            //    return default;
+            //}
+            //else
+            //{
+            //    var result = resultProperty.GetValue(originalTask, null);
+            //    if (result == default)
+            //        return default;
+            //    return (TResult)result;
+            //}
         }
     }
 }

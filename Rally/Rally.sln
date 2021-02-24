@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rally.Core", "Rally.Core\Rally.Core.csproj", "{4326CF27-CFE1-4661-8039-372CDD2BA31B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rally.Core", "Rally.Core\Rally.Core.csproj", "{4326CF27-CFE1-4661-8039-372CDD2BA31B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rally.TestingHost", "Rally.TestingHost\Rally.TestingHost.csproj", "{0B54585C-8A6E-4190-AA3F-E25E97F0BE25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rally.TestingHost", "Rally.TestingHost\Rally.TestingHost.csproj", "{0B54585C-8A6E-4190-AA3F-E25E97F0BE25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rally.TestingWebHost", "Rally.TestingWebHost\Rally.TestingWebHost.csproj", "{9363E67B-AE03-4214-BB8A-36EBB086FF34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0B54585C-8A6E-4190-AA3F-E25E97F0BE25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B54585C-8A6E-4190-AA3F-E25E97F0BE25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B54585C-8A6E-4190-AA3F-E25E97F0BE25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9363E67B-AE03-4214-BB8A-36EBB086FF34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9363E67B-AE03-4214-BB8A-36EBB086FF34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9363E67B-AE03-4214-BB8A-36EBB086FF34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9363E67B-AE03-4214-BB8A-36EBB086FF34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

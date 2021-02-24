@@ -38,13 +38,17 @@ namespace Rally.Core.Client
                 }
                 else
                 {
-                    var returnType = invocation.Method.ReturnType.GetProperty("Result").GetType();
+                    var returnType = invocation.Method.ReturnType.GetProperty("Result").PropertyType;
                     var returnValue = _postMan.PostMailAsync(returnType, mail);
                     invocation.ReturnValue = returnValue;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
+                if (ex.InnerException != null)
+                {
+                }
                 //...                
             }
         }

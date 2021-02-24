@@ -20,4 +20,21 @@ namespace Rally.Core
 
         public TaskCompletionSource<object> Receipt { get; set; }
     }
+
+    public class Request
+    {
+        public object[] Parameters { get; set; }
+
+        public string ActorId { get; set; }
+
+        public string InterfaceName { get; set; }
+
+        public string MethodName { get; set; }
+        public DateTime SendTime { get; set; }
+    }
+
+    public class Response
+    {
+        public object Result { get; set; }
+    }
 }
