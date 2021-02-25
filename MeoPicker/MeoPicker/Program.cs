@@ -11,11 +11,7 @@ namespace MeoPicker
         {
             Console.WriteLine("Hello World!");
 
-            var wcs = new WebClient[10];
-            for(int i = 0; i< wcs.Length; i++)
-            {
-                wcs[i] = new WebClient();
-            }
+            DownloadWorkerMarket dwm = new DownloadWorkerMarket(10);
 
             for (int page = 1; page < 100; page++)
             {
@@ -51,11 +47,12 @@ namespace MeoPicker
                                 var picUrl = picA.GetAttributeValue<string>("href", null);
                                 var picNameIndex = picUrl.LastIndexOf('/');
                                 var picName = picUrl.Substring(picNameIndex+1, picUrl.Length - picNameIndex - 1);
-                                WebClient wc = new WebClient();
-                                wc.DownloadFile(picUrl, $"{picSetTitle}/{picName}");
+                                var picFileName = $"{picSetTitle}/{picName}";
+                                Console.WriteLine($"开始下载[{picFileName}]");
+                                var wc = dwm.GetOne();
+                                wc.DownloadFileTaskAsync(picUrl, picFileName).ContinueWith(x=> dwm.Release(wc)).ConfigureAwait(false);
                             }
                         }
-
                     }
                 }
 
