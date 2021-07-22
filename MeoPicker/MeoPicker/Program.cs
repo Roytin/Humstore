@@ -19,7 +19,9 @@ namespace MeoPicker
 
                 HtmlWeb web = new HtmlWeb();
                 var htmlDoc = web.Load(url);
-                var picSetNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[@class='post']");
+                ///html/body/div[1]/div[4]/div[1]/div[2]/div[1]/div[1]/div[4]
+                ///html/body/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[@class='post']
+                var picSetNodes = htmlDoc.DocumentNode.SelectNodes("//div[@id='main-2']/div[@class='post']");
 
                 int setNum = 1;
                 foreach (var picSetNode in picSetNodes)
@@ -29,9 +31,9 @@ namespace MeoPicker
                     {
                         var picSetUrl = picSetA.GetAttributeValue<string>("href", null);
                         var picSetTitle = picSetA.GetAttributeValue<string>("title", null);
-                        if (!Directory.Exists(picSetTitle))
+                        if (!Directory.Exists("pics"))
                         {
-                            Directory.CreateDirectory(picSetTitle);
+                            Directory.CreateDirectory("pics");
                         }
                         Console.WriteLine($"[{page}-{setNum++}][{picSetTitle}]{picSetUrl}");
 
@@ -47,7 +49,7 @@ namespace MeoPicker
                                 var picUrl = picA.GetAttributeValue<string>("href", null);
                                 var picNameIndex = picUrl.LastIndexOf('/');
                                 var picName = picUrl.Substring(picNameIndex+1, picUrl.Length - picNameIndex - 1);
-                                var picFileName = $"{picSetTitle}/{picName}";
+                                var picFileName = $"pics/{picSetTitle}_{picName}";
                                 Console.WriteLine($"开始下载[{picFileName}]");
                                 var wc = dwm.GetOne();
                                 wc.DownloadFileTaskAsync(picUrl, picFileName).ContinueWith(x=> dwm.Release(wc)).ConfigureAwait(false);
@@ -56,8 +58,8 @@ namespace MeoPicker
                     }
                 }
 
-                Console.WriteLine("一页扫描完毕,是否进入下一页?");
-                Console.ReadLine();
+                Console.WriteLine($"[{page}]一页扫描完毕,是否进入下一页?");
+                //Console.ReadLine();
 
             }
 
